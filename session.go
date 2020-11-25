@@ -2919,7 +2919,6 @@ func (p *Pipe) SetMaxTime(d time.Duration) *Pipe {
 	return p
 }
 
-
 // Collation allows to specify language-specific rules for string comparison,
 // such as rules for lettercase and accent marks.
 // When specifying collation, the locale field is mandatory; all other collation
@@ -4000,7 +3999,7 @@ func (db *Database) CollectionNames() (names []string, err error) {
 		sort.Strings(names)
 		return names, err
 	}
-	if err != nil && !isNoCmd(err) {
+	if !isNoCmd(err) {
 		return nil, err
 	}
 
@@ -4018,6 +4017,72 @@ func (db *Database) CollectionNames() (names []string, err error) {
 	}
 	sort.Strings(names)
 	return names, nil
+}
+
+// CollInfo defines return message of 'db.getCollectionInfos()'
+// run by 'listCollections' cmd.
+// Relevant document:
+//
+//	https://docs.mongodb.com/manual/reference/command/listCollections/#list-collection-output
+//  https://docs.mongodb.com/manual/reference/method/db.createCollection/#db.createCollection
+//
+type CollInfo struct {
+	Name    string          `bson:"name"`              // name of the collection
+	Type    string          `bson:"type"`              // Type of data store. Returns ‘collection’ for collections and ‘view’ for views.
+	Options CollectionInfo `bson:"options,omitempty"` // Collection options
+	Info    struct {
+		ReadOnly bool        `bson:"readOnly,omitempty"` // if the data store is read only.
+		Uuid     bson.Binary `bson:"uuid,omitempty"`     // UUID in binData type, new in 3.6
+	} `bson:"info,omitempty"`
+	IdIndex Index `bson:"idIndex,omitempty"` // Provides information on the _id index for the collection.
+}
+
+// CollectionInfos returns the collection infos present in the db database.
+func (db *Database) CollectionInfos() (CollInfos []CollInfo, err error) {
+	// Clone session and set it to Monotonic mode so that the server
+	// used for the query may be safely obtained afterwards, if
+	// necessary for iteration when a cursor is received.
+	cloned := db.Session.nonEventual()
+	defer cloned.Close()
+
+	batchSize := int(cloned.queryConfig.op.limit)
+
+	// Try with a command.
+	var result struct {
+		Collections []bson.Raw
+		Cursor      cursorData
+	}
+	err = db.With(cloned).Run(bson.D{{Name: "listCollections", Value: 1}, {Name: "cursor", Value: bson.D{{Name: "batchSize", Value: batchSize}}}}, &result)
+	if err == nil {
+		firstBatch := result.Collections
+		if firstBatch == nil {
+			firstBatch = result.Cursor.FirstBatch
+		}
+		var iter *Iter
+		ns := strings.SplitN(result.Cursor.NS, ".", 2)
+		if len(ns) < 2 {
+			iter = db.With(cloned).C("").NewIter(nil, firstBatch, result.Cursor.Id, nil)
+		} else {
+			iter = cloned.DB(ns[0]).C(ns[1]).NewIter(nil, firstBatch, result.Cursor.Id, nil)
+		}
+		var collInfo CollInfo
+		for iter.Next(&collInfo) {
+			CollInfos = append(CollInfos, collInfo)
+		}
+		if err := iter.Close(); err != nil {
+			return nil, err
+		}
+		// no need to sort
+		return CollInfos, err
+	}
+
+	if !isNoCmd(err) {
+		return nil, err
+	}
+
+	// remove query in 'system.namespaces', it's too low version, should not appear anymore
+
+	return nil, fmt.Errorf("no such cmd, raw error:%v", err)
 }
 
 type dbNames struct {
