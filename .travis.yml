@@ -1,6 +1,6 @@
 language: go
 
-go_import_path: github.com/globalsign/mgo
+go_import_path: github.com/phoenixxliu/mgo
 
 go:
     - 1.9.x
@@ -8,7 +8,7 @@ go:
 
 env:
     global:
-        - BUCKET=https://s3.eu-west-2.amazonaws.com/globalsign-mgo
+        - BUCKET=https://s3.eu-west-2.amazonaws.com/phoenixxliu-mgo
         - FASTDL=https://fastdl.mongodb.org/linux
     matrix:
         - MONGODB=x86_64-ubuntu1404-3.0.15
@@ -33,7 +33,7 @@ install:
 
 before_script:
     - golint  ./... | grep -v 'ID' | cat
-    - go vet github.com/globalsign/mgo/bson github.com/globalsign/mgo/txn github.com/globalsign/mgo 
+    - go vet github.com/phoenixxliu/mgo/bson github.com/phoenixxliu/mgo/txn github.com/phoenixxliu/mgo
     - export NOIPV6=1
     - make startdb
 
@@ -44,6 +44,6 @@ script:
     - make stopdb
 
 git:
-  depth: 3
+    depth: 3
 
 # vim:sw=4:ts=4:et
