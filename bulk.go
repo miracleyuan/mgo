@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"sort"
 	"sync"
+	"fmt"
 
 	"github.com/phoenixxliu/mgo/bson"
 )
@@ -64,12 +65,16 @@ type BulkError struct {
 	ecases []BulkErrorCase
 }
 
+// add index and duplicate in error message to return
+// so that caller can easily locate which operation in bulk meet error
+// and if it's 'duplicate key' error
 func (e *BulkError) Error() string {
 	if len(e.ecases) == 0 {
 		return "invalid BulkError instance: no errors"
 	}
 	if len(e.ecases) == 1 {
-		return e.ecases[0].Err.Error()
+		//return e.ecases[0].Err.Error()
+		return fmt.Sprintf("index[%v], msg[%v], dup[%v]", e.ecases[0].Index, e.ecases[0].Err, IsDup(e.ecases[0].Err))
 	}
 	msgs := make([]string, 0, len(e.ecases))
 	seen := make(map[string]bool)
@@ -77,7 +82,8 @@ func (e *BulkError) Error() string {
 		msg := ecase.Err.Error()
 		if !seen[msg] {
 			seen[msg] = true
-			msgs = append(msgs, msg)
+			//msgs = append(msgs, msg)
+			msgs = append(msgs, fmt.Sprintf("index[%v], msg[%v], dup[%v]", ecase.Index, msg, IsDup(e.ecases[0].Err)))
 		}
 	}
 	if len(msgs) == 1 {
