@@ -2,6 +2,8 @@
 
 This is a dev version of phoenix
 ## Changes
+* `simpleIndexKey` support bool type and transform to 0/1
+* fix connection full bug
 
 
 -------------------------
