@@ -185,7 +185,7 @@ func simulate(c *C, server *dbtest.DBServer, params params) {
 	if params.changelog {
 		info := mgo.CollectionInfo{
 			Capped:   true,
-			MaxBytes: 1000000,
+			Size: 1000000,
 		}
 		err := tclog.Create(&info)
 		c.Assert(err, IsNil)

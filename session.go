@@ -3205,28 +3205,38 @@ func (c *Collection) DropCollection() error {
 //
 //     http://www.mongodb.org/display/DOCS/createCollection+Command
 //     http://www.mongodb.org/display/DOCS/Capped+Collections
+//	   https://docs.mongodb.com/manual/reference/method/db.createCollection/ (added by phoenix)
 //
 type CollectionInfo struct {
 	// DisableIdIndex prevents the automatic creation of the index
 	// on the _id field for the collection.
-	DisableIdIndex bool
+	//DisableIdIndex bool
 
 	// ForceIdIndex enforces the automatic creation of the index
 	// on the _id field for the collection. Capped collections,
 	// for example, do not have such an index by default.
-	ForceIdIndex bool
+	//ForceIdIndex bool
+
+	// AutoIndexId, Specify false to disable the automatic creation of an index on the _id field.
+	// Starting in MongoDB 4.0, you cannot set the option autoIndexId to false when creating collections
+	// in databases other than the local database.
+	// (IMPORTANT: this field is deprecated since version 3.2)
+	AutoIndexId bool
 
 	// If Capped is true new documents will replace old ones when
-	// the collection is full. MaxBytes must necessarily be set
+	// the collection is full. Size('MaxBytes') must necessarily be set
 	// to define the size when the collection wraps around.
-	// MaxDocs optionally defines the number of documents when it
-	// wraps, but MaxBytes still needs to be set.
+	// max('MaxDocs') optionally defines the number of documents when it
+	// wraps, but Size still needs to be set.
 	Capped   bool
-	MaxBytes int
-	MaxDocs  int
+	//MaxBytes int
+	//MaxDocs  int
+	Size int
+	Max int
 
 	// Validator contains a validation expression that defines which
 	// documents should be considered valid for this collection.
+	// New in version 3.2
 	Validator interface{}
 
 	// ValidationLevel may be set to "strict" (the default) to force
@@ -3234,22 +3244,45 @@ type CollectionInfo struct {
 	// "moderate" to apply the validation rules only to documents
 	// that already fulfill the validation criteria, or to "off" for
 	// disabling validation entirely.
+	// (new in version 3.2)
 	ValidationLevel string
 
 	// ValidationAction determines how MongoDB handles documents that
 	// violate the validation rules. It may be set to "error" (the default)
 	// to reject inserts or updates that violate the rules, or to "warn"
 	// to log invalid operations but allow them to proceed.
+	// (new in version 3.2)
 	ValidationAction string
+
+	// Allows users to specify a default configuration for indexes when creating a collection.
+	// this accepts a storageEngine document, which should take the following form:
+	// { <storage-engine-name>: <options> }
+	IndexOptionDefaults interface{}
+
 
 	// StorageEngine allows specifying collection options for the
 	// storage engine in use. The map keys must hold the storage engine
 	// name for which options are being specified.
+	// Available for the WiredTiger storage engine only.
 	StorageEngine interface{}
 	// Specifies the default collation for the collection.
 	// Collation allows users to specify language-specific rules for string
 	// comparison, such as rules for lettercase and accent marks.
+	// (New in version 3.4)
 	Collation *Collation
+
+	// The name of the source collection or view from which to create the view.
+	// The name is not the full namespace of the collection or view
+	// (New in version 3.4)
+	ViewOn string
+	
+	// An array that consists of the aggregation pipeline stage(s)
+	// will creates the view by applying the specified pipeline to the viewOn collection or view.
+	// (New in version 3.4)
+	Pipeline interface{}
+
+	//  A document that expresses the write concern for the operation. Omit to use the default write concern.
+	// WriteConcern interface{}
 }
 
 // Create explicitly creates the c collection with details of info.
@@ -3261,26 +3294,22 @@ type CollectionInfo struct {
 //
 //     http://www.mongodb.org/display/DOCS/createCollection+Command
 //     http://www.mongodb.org/display/DOCS/Capped+Collections
+//	   https://docs.mongodb.com/manual/reference/method/db.createCollection/ (added by phoenix)
 //
 func (c *Collection) Create(info *CollectionInfo) error {
 	cmd := make(bson.D, 0, 4)
 	cmd = append(cmd, bson.DocElem{Name: "create", Value: c.Name})
 	if info.Capped {
-		if info.MaxBytes < 1 {
-			return fmt.Errorf("Collection.Create: with Capped, MaxBytes must also be set")
+		if info.Size < 1 {
+			return fmt.Errorf("Collection.Create: with Capped, Size must also be set")
 		}
 		cmd = append(cmd, bson.DocElem{Name: "capped", Value: true})
-		cmd = append(cmd, bson.DocElem{Name: "size", Value: info.MaxBytes})
-		if info.MaxDocs > 0 {
-			cmd = append(cmd, bson.DocElem{Name: "max", Value: info.MaxDocs})
+		cmd = append(cmd, bson.DocElem{Name: "size", Value: info.Size})
+		if info.Max > 0 {
+			cmd = append(cmd, bson.DocElem{Name: "max", Value: info.Max})
 		}
 	}
-	if info.DisableIdIndex {
-		cmd = append(cmd, bson.DocElem{Name: "autoIndexId", Value: false})
-	}
-	if info.ForceIdIndex {
-		cmd = append(cmd, bson.DocElem{Name: "autoIndexId", Value: true})
-	}
+	cmd =append(cmd, bson.DocElem{Name:"autoIndexId", Value: info.AutoIndexId})
 	if info.Validator != nil {
 		cmd = append(cmd, bson.DocElem{Name: "validator", Value: info.Validator})
 	}
@@ -3290,11 +3319,20 @@ func (c *Collection) Create(info *CollectionInfo) error {
 	if info.ValidationAction != "" {
 		cmd = append(cmd, bson.DocElem{Name: "validationAction", Value: info.ValidationAction})
 	}
+	if info.IndexOptionDefaults != nil {
+		cmd = append(cmd, bson.DocElem{Name: "indexOptionDefaults", Value: info.IndexOptionDefaults})
+	}
 	if info.StorageEngine != nil {
 		cmd = append(cmd, bson.DocElem{Name: "storageEngine", Value: info.StorageEngine})
 	}
 	if info.Collation != nil {
 		cmd = append(cmd, bson.DocElem{Name: "collation", Value: info.Collation})
+	}
+	if info.ViewOn != "" {
+		cmd = append(cmd, bson.DocElem{Name:"viewOn", Value: info.ViewOn})
+	}
+	if info.Pipeline != nil {
+		cmd= append(cmd, bson.DocElem{Name: "pipeline", Value: info.Pipeline})
 	}
 
 	return c.Database.Run(cmd, nil)

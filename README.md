@@ -6,6 +6,7 @@ This is a dev version of phoenix
 * fix connection full bug
 * add index&duplicate info to bulk write error message
 * add CollectionInfos func
+* refine for createCollection
 
 -------------------------
 

@@ -1054,8 +1054,8 @@ func (s *S) TestCreateCollectionCapped(c *C) {
 
 	info := &mgo.CollectionInfo{
 		Capped:   true,
-		MaxBytes: 1024,
-		MaxDocs:  3,
+		Size: 1024,
+		Max:  3,
 	}
 	err = coll.Create(info)
 	c.Assert(err, IsNil)
@@ -1079,7 +1079,8 @@ func (s *S) TestCreateCollectionNoIndex(c *C) {
 	coll := session.DB("mydb").C("mycoll")
 
 	info := &mgo.CollectionInfo{
-		DisableIdIndex: true,
+		//DisableIdIndex: true,
+		AutoIndexId: false,
 	}
 	err = coll.Create(info)
 	c.Assert(err, IsNil)
@@ -1099,9 +1100,10 @@ func (s *S) TestCreateCollectionForceIndex(c *C) {
 	coll := session.DB("mydb").C("mycoll")
 
 	info := &mgo.CollectionInfo{
-		ForceIdIndex: true,
+		//ForceIdIndex: true,
+		AutoIndexId: true,
 		Capped:       true,
-		MaxBytes:     1024,
+		Size:     1024,
 	}
 	err = coll.Create(info)
 	c.Assert(err, IsNil)
@@ -1275,9 +1277,10 @@ func (s *S) TestIsDupCapped(c *C) {
 	coll := session.DB("mydb").C("mycoll")
 
 	info := &mgo.CollectionInfo{
-		ForceIdIndex: true,
+		//ForceIdIndex: true,
+		AutoIndexId: true,
 		Capped:       true,
-		MaxBytes:     1024,
+		Size:     1024,
 	}
 	err = coll.Create(info)
 	c.Assert(err, IsNil)
