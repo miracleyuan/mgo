@@ -7,6 +7,7 @@ This is a dev version of phoenix
 * add index&duplicate info to bulk write error message
 * add CollectionInfos func
 * refine for createCollection
+* add isMaster support for CMongo4.0
 
 -------------------------
 

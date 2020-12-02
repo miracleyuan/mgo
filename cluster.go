@@ -142,7 +142,8 @@ func (cluster *mongoCluster) isMaster(socket *mongoSocket, result *isMasterResul
 	session := newSession(Monotonic, cluster, cluster.dialInfo)
 	session.setSocket(socket)
 
-	var cmd = bson.D{{Name: "isMaster", Value: 1}}
+	//var cmd = bson.D{{Name: "isMaster", Value: 1}}
+	var cmd = bson.D{{Name: "isMaster", Value: 1}, {Name:"internal", Value: true}}
 
 	// Send client metadata to the server to identify this socket if this is
 	// the first isMaster call only.
