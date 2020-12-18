@@ -1313,7 +1313,7 @@ func isNoCmd(err error) bool {
 
 func isNotFound(err error) bool {
 	e, ok := err.(*QueryError)
-	return ok && e.Code == 11
+	return ok && (e.Code == 11 || e.Code == 47)
 }
 
 func isAuthError(err error) bool {
