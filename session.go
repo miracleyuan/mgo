@@ -3221,23 +3221,23 @@ type CollectionInfo struct {
 	// Starting in MongoDB 4.0, you cannot set the option autoIndexId to false when creating collections
 	// in databases other than the local database.
 	// (IMPORTANT: this field is deprecated since version 3.2)
-	AutoIndexId bool
+	AutoIndexId bool `bson:"autoIndexId,omitempty"`
 
 	// If Capped is true new documents will replace old ones when
 	// the collection is full. Size('MaxBytes') must necessarily be set
 	// to define the size when the collection wraps around.
 	// max('MaxDocs') optionally defines the number of documents when it
 	// wraps, but Size still needs to be set.
-	Capped   bool
+	Capped   bool `bson:"capped,omitempty"`
 	//MaxBytes int
 	//MaxDocs  int
-	Size int
-	Max int
+	Size int `bson:"size,omitempty"`
+	Max int `bson:"max,omitempty"`
 
 	// Validator contains a validation expression that defines which
 	// documents should be considered valid for this collection.
 	// New in version 3.2
-	Validator interface{}
+	Validator interface{} `bson:"validator,omitempty"`
 
 	// ValidationLevel may be set to "strict" (the default) to force
 	// MongoDB to validate all documents on inserts and updates, to
@@ -3245,41 +3245,41 @@ type CollectionInfo struct {
 	// that already fulfill the validation criteria, or to "off" for
 	// disabling validation entirely.
 	// (new in version 3.2)
-	ValidationLevel string
+	ValidationLevel string `bson:"validation,omitempty"`
 
 	// ValidationAction determines how MongoDB handles documents that
 	// violate the validation rules. It may be set to "error" (the default)
 	// to reject inserts or updates that violate the rules, or to "warn"
 	// to log invalid operations but allow them to proceed.
 	// (new in version 3.2)
-	ValidationAction string
+	ValidationAction string `bson:"validationAction,omitempty"`
 
 	// Allows users to specify a default configuration for indexes when creating a collection.
 	// this accepts a storageEngine document, which should take the following form:
 	// { <storage-engine-name>: <options> }
-	IndexOptionDefaults interface{}
+	IndexOptionDefaults interface{} `bson:"indexOptionDefaults,omitempty"`
 
 
 	// StorageEngine allows specifying collection options for the
 	// storage engine in use. The map keys must hold the storage engine
 	// name for which options are being specified.
 	// Available for the WiredTiger storage engine only.
-	StorageEngine interface{}
+	StorageEngine interface{} `bson:"storageEngine,omitempty"`
 	// Specifies the default collation for the collection.
 	// Collation allows users to specify language-specific rules for string
 	// comparison, such as rules for lettercase and accent marks.
 	// (New in version 3.4)
-	Collation *Collation
+	Collation *Collation `bson:"collation,omitempty"`
 
 	// The name of the source collection or view from which to create the view.
 	// The name is not the full namespace of the collection or view
 	// (New in version 3.4)
-	ViewOn string
+	ViewOn string `bson:"viewOn,omitempty"`
 	
 	// An array that consists of the aggregation pipeline stage(s)
 	// will creates the view by applying the specified pipeline to the viewOn collection or view.
 	// (New in version 3.4)
-	Pipeline interface{}
+	Pipeline interface{} `bson:"pipeline,omitempty"`
 
 	//  A document that expresses the write concern for the operation. Omit to use the default write concern.
 	// WriteConcern interface{}
