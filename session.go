@@ -5312,6 +5312,38 @@ func (s *Session) unsetSocket() {
 	s.slaveSocket = nil
 }
 
+// @phoenixxliu added
+// GetOplogGenerator return oplogGenerator if exist, otherwise return ""
+func (s *Session) GetOplogGenerator() (string, error) {
+	var res bson.M
+	cmd := bson.D{{"oplogGenerator",1}, {"get", 1}}
+	err := s.DB("admin").Run(cmd, &res)
+	if err != nil {
+		if isNoCmd(err) {
+			return "", nil
+		}
+		return "", err
+	}
+	if _, ok := res["is"]; ok {
+		return res["is"].(string), nil
+	}
+	return "", fmt.Errorf("unexpected result of oplogGenerator cmd")
+}
+
+// SetOplogGenerator set oplog generator
+func (s *Session) SetOplogGenerator(tag string) error {
+	var res interface{}
+	cmd := bson.D{{"oplogGenerator", 1}, {"set", tag}}
+	err := s.DB("admin").Run(cmd, res)
+	if err != nil {
+		if isNoCmd(err) {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
 func (iter *Iter) replyFunc() replyFunc {
 	return func(err error, op *replyOp, docNum int, docData []byte) {
 		iter.m.Lock()
