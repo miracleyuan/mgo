@@ -123,6 +123,7 @@ type Session struct {
 type Database struct {
 	Session *Session
 	Name    string
+	Generator string // "g" for oplog
 }
 
 // Collection stores documents
@@ -135,6 +136,7 @@ type Collection struct {
 	Database *Database
 	Name     string // "collection"
 	FullName string // "db.collection"
+	Generator string // "g" for oplog
 }
 
 // Query keeps info on the query.
@@ -895,19 +897,39 @@ func (s *Session) LiveServers() (addrs []string) {
 //
 // Creating this value is a very lightweight operation, and
 // involves no network communication.
-func (s *Session) DB(name string) *Database {
+// 注意：这里用不定长参数模拟默认参数的功能。generator参数列表长度不能大于1。
+// generator默认不填，只在多向同步的时候，同步程序会填generator字段。
+func (s *Session) DB(name string, generator ...string) *Database {
 	if name == "" {
 		name = s.defaultdb
 	}
-	return &Database{s, name}
+	if len(generator) > 1 {
+		panic("database generator arguments can not larger then 1")
+	} else if len(generator) == 1 {
+		// add "g"
+		return &Database{s, name, generator[0]}
+	} else {
+		// not add "g"
+		return &Database{s, name, ""}
+	}
 }
 
 // C returns a value representing the named collection.
 //
 // Creating this value is a very lightweight operation, and
 // involves no network communication.
-func (db *Database) C(name string) *Collection {
-	return &Collection{db, name, db.Name + "." + name}
+// 注意：这里用不定长参数模拟默认参数的功能。generator参数列表长度不能大于1。
+// generator默认不填，只在多向同步的时候，同步程序会填generator字段。
+func (db *Database) C(name string, generator ...string) *Collection {
+	if len(generator) > 1 {
+		panic("coll generator arguments can not larger then 1")
+	} else if len(generator) == 1 {
+		// add "g"
+		return &Collection{db, name, db.Name + "." + name, generator[0]}
+	} else {
+		// not add "g"
+		return &Collection{db, name, db.Name + "." + name, ""}
+	}
 }
 
 // CreateView creates a view as the result of the applying the specified
@@ -5683,6 +5705,10 @@ func (c *Collection) writeOpCommand(socket *mongoSocket, safeOp *queryOp, op int
 	}
 	if bypassValidation {
 		cmd = append(cmd, bson.DocElem{Name: "bypassDocumentValidation", Value: true})
+	}
+
+	if c.Generator != "" {
+		cmd = append(cmd, bson.DocElem{Name: "g", Value: c.Generator})
 	}
 
 	var result writeCmdResult
