@@ -27,7 +27,7 @@
 package mgo_test
 
 import (
-	mgo "github.com/phoenixxliu/mgo"
+	mgo "github.com/miracleyuan/mgo"
 	. "gopkg.in/check.v1"
 )
 

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/phoenixxliu/mgo.svg?branch=master)](https://travis-ci.org/phoenixxliu/mgo) [![GoDoc](https://godoc.org/github.com/phoenixxliu/mgo?status.svg)](https://godoc.org/github.com/phoenixxliu/mgo)
+[![Build Status](https://travis-ci.org/phoenixxliu/mgo.svg?branch=master)](https://travis-ci.org/phoenixxliu/mgo) [![GoDoc](https://godoc.org/github.com/miracleyuan/mgo?status.svg)](https://godoc.org/github.com/miracleyuan/mgo)
 
 This is a dev version of phoenix
 ## Changes
@@ -21,9 +21,9 @@ Changes are mostly geared towards performance improvements and bug fixes, though
 Further PR's (with tests) are welcome, but please maintain backwards compatibility.
 
 Detailed documentation of the API is available at
-[GoDoc](https://godoc.org/github.com/phoenixxliu/mgo).
+[GoDoc](https://godoc.org/github.com/miracleyuan/mgo).
 
-A [sub-package](https://godoc.org/github.com/phoenixxliu/mgo/bson) that implements the [BSON](http://bsonspec.org) specification is also included, and may be used independently of the driver.
+A [sub-package](https://godoc.org/github.com/miracleyuan/mgo/bson) that implements the [BSON](http://bsonspec.org) specification is also included, and may be used independently of the driver.
 
 ## Supported Versions
 

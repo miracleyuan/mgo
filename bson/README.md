@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/github.com/phoenixxliu/mgo/bson?status.svg)](https://godoc.org/github.com/phoenixxliu/mgo/bson)
+[![GoDoc](https://godoc.org/github.com/miracleyuan/mgo/bson?status.svg)](https://godoc.org/github.com/miracleyuan/mgo/bson)
 
 An Implementation of BSON for Go
 --------------------------------

@@ -45,7 +45,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/phoenixxliu/mgo/bson"
+	"github.com/miracleyuan/mgo/bson"
 )
 
 // Mode read preference mode. See Eventual, Monotonic and Strong for details

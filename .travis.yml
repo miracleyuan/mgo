@@ -1,6 +1,6 @@
 language: go
 
-go_import_path: github.com/phoenixxliu/mgo
+go_import_path: github.com/miracleyuan/mgo
 
 go:
     - 1.9.x
@@ -33,7 +33,7 @@ install:
 
 before_script:
     - golint  ./... | grep -v 'ID' | cat
-    - go vet github.com/phoenixxliu/mgo/bson github.com/phoenixxliu/mgo/txn github.com/phoenixxliu/mgo
+    - go vet github.com/miracleyuan/mgo/bson github.com/miracleyuan/mgo/txn github.com/miracleyuan/mgo
     - export NOIPV6=1
     - make startdb
 

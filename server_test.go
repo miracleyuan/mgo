@@ -29,7 +29,7 @@ package mgo_test
 import (
 	"time"
 
-	"github.com/phoenixxliu/mgo"
+	"github.com/miracleyuan/mgo"
 	. "gopkg.in/check.v1"
 )
 
